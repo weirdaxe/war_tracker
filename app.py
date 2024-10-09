@@ -212,7 +212,7 @@ dark_map = datetime.datetime.now().time() > datetime.time(18,0)
 if dark_map:
     map_col = 'carto-darkmatter'
 else:
-    map_col = 'carto- positron'
+    map_col = 'carto-positron'
 
 # Streamlit App
 st.title("Matic's Middle East Event Visualization Dashboard")
@@ -258,10 +258,12 @@ if map_tog:
             hover_name="event_id_cnty",
             hover_data=["event_date", "event_type","actor_group"],
             color="country" if len(countries) > 1 else "event_type",
-            size_max=10,
-            zoom=5,
-            mapbox_style='carto-darkmatter',
-            title="Event Map"
+            size_max=20,
+            zoom=3,
+            mapbox_style='carto-positron',
+            title="Event Map",
+            height=1000,
+            width = 1500
         )
         st.plotly_chart(fig_map)
 if not map_tog:
@@ -274,9 +276,11 @@ if not map_tog:
             hover_data=["event_date", "event_type","actor_group"],
             color="country" if len(countries) > 1 else "event_type",
             size_max=20,
-            zoom=8,
-            mapbox_style=map_col,
-            title="Event Map"
+            zoom=3,
+            mapbox_style='carto-positron',
+            title="Event Map",
+            height=1000,
+            width = 1500
         )
         st.plotly_chart(fig_map)
 
@@ -337,18 +341,14 @@ if not map_tog:
             
 
     # Plotting
-    fig_time_series = go.Figure()
+    fig_time_series = px.line(time_series_df, 
+                               x='event_date', 
+                               y='event_count', 
+                               color='country', 
+                               title='Events Over Time', height=800, width=1200,
+                               labels={'event_date': 'Date', 'event_count': 'Number of Events'})
     
-    for country in countries:
-        country_data = time_series_df[time_series_df['country'] == country]
-        fig_time_series.add_trace(go.Scatter(x=country_data['event_date'], 
-                                              y=country_data['event_count'], 
-                                              mode='lines+markers',
-                                              name=country))
-    
-    fig_time_series.update_layout(title='Events Over Time',
-                                   xaxis_title='Date',
-                                   yaxis_title='Number of Events')
+    # Show the plot
     st.plotly_chart(fig_time_series)
 
 else:
