@@ -263,7 +263,7 @@ if map_tog:
             mapbox_style='carto-positron',
             title="Event Map",
             height=800,
-            width = 1500
+            width = 1800
         )
         st.plotly_chart(fig_map)
 if not map_tog:
@@ -280,7 +280,7 @@ if not map_tog:
             mapbox_style='carto-positron',
             title="Event Map",
             height=800,
-            width = 1500
+            width = 1800
         )
         st.plotly_chart(fig_map)
 
@@ -345,7 +345,7 @@ if not map_tog:
                                x='event_date', 
                                y='event_count', 
                                color='country', 
-                               title='Events Over Time', height=800, width=1700,
+                               title='Events Over Time', height=800, width=1800,
                                labels={'event_date': 'Date', 'event_count': 'Number of Events'})
     
     # Show the plot
