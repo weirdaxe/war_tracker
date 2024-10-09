@@ -1,0 +1,7 @@
+[ui]
+hideTopBar = true
+
+[theme]
+base="light"
+primaryColor="#187ABA"
+textColor="#373233"
