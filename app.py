@@ -265,6 +265,8 @@ if map_tog:
             height=800,
             width = 1800
         )
+        fig_map.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 100
+        fig_map.layout.updatemenus[0].buttons[0].args[1]['transition']['duration'] = 50
         st.plotly_chart(fig_map)
 if not map_tog:
     if not filtered_df.empty:
