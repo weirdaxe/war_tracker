@@ -5,7 +5,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-
+from os import listdir
+from os.path import isfile, join
 
 actor_map = mapping = {
     "Protesters (Iran)": "Protestors - Iran",
@@ -174,32 +175,36 @@ def load_data(actor_map=actor_map,path = "war_tracker.csv"):
 
 #df = load_data()
 
-from os import listdir
-from os.path import isfile, join
-import pandas as pd
-pd.set_option('display.max_columns', None)
-mypath = "data/"
-onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-def safe_eval(text):
-    # Replace 'true' with 'True' and 'false' with 'False'
-    text = text.replace('true', 'True')
-    return text
-
-with open("data/"+onlyfiles[0],"r") as file:
-    for line in file:
-        line = safe_eval(line)
-        df = pd.DataFrame.from_dict(eval(line)["data"])
-        
-for file_name in onlyfiles[1:]:
-    with open("data/"+file_name, "r") as file:
+@st.cache_data
+def get_data(actor_map=actor_map):
+    mypath = "data/"
+    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    def safe_eval(text):
+        # Replace 'true' with 'True' and 'false' with 'False'
+        text = text.replace('true', 'True')
+        return text
+    
+    with open("data/"+onlyfiles[0],"r") as file:
         for line in file:
             line = safe_eval(line)
-            dict_ = eval(line)
-    df = pd.concat([df, pd.DataFrame.from_dict(dict_["data"])])
-df = df.reset_index(drop=True)
-df.to_csv("war_tracker.csv")
+            df = pd.DataFrame.from_dict(eval(line)["data"])
+            
+    for file_name in onlyfiles[1:]:
+        with open("data/"+file_name, "r") as file:
+            for line in file:
+                line = safe_eval(line)
+                dict_ = eval(line)
+        df = pd.concat([df, pd.DataFrame.from_dict(dict_["data"])])
+    df = df.reset_index(drop=True)
+    df['event_date'] = pd.to_datetime(df['event_date'])
+    df['latitude'] = pd.to_numeric(df['latitude'])
+    df['longitude'] = pd.to_numeric(df['longitude'])
+    df['actor_group'] = df['actor1'].map(actor_map)
+    
+    return df
+#df.to_csv("war_tracker.csv")
 
-
+df = get_data()
 filtered_df = df.copy()
     
 # Streamlit App
