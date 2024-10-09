@@ -259,10 +259,10 @@ if map_tog:
             hover_data=["event_date", "event_type","actor_group"],
             color="country" if len(countries) > 1 else "event_type",
             size_max=20,
-            zoom=3,
+            zoom=4,
             mapbox_style='carto-positron',
             title="Event Map",
-            height=1000,
+            height=800,
             width = 1500
         )
         st.plotly_chart(fig_map)
@@ -276,10 +276,10 @@ if not map_tog:
             hover_data=["event_date", "event_type","actor_group"],
             color="country" if len(countries) > 1 else "event_type",
             size_max=20,
-            zoom=3,
+            zoom=4,
             mapbox_style='carto-positron',
             title="Event Map",
-            height=1000,
+            height=800,
             width = 1500
         )
         st.plotly_chart(fig_map)
