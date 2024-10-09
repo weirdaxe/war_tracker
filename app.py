@@ -345,7 +345,7 @@ if not map_tog:
                                x='event_date', 
                                y='event_count', 
                                color='country', 
-                               title='Events Over Time', height=800, width=1200,
+                               title='Events Over Time', height=800, width=1700,
                                labels={'event_date': 'Date', 'event_count': 'Number of Events'})
     
     # Show the plot
