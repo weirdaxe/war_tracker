@@ -175,7 +175,7 @@ def load_data(actor_map=actor_map,path = "war_tracker.csv"):
 
 #df = load_data()
 
-@st.cache_data
+@st.cache_data(show_spinner="Preparing the Data", persist=True)
 def get_data(actor_map=actor_map):
     mypath = "data/"
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
