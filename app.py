@@ -260,7 +260,7 @@ if map_tog:
             color="country" if len(countries) > 1 else "event_type",
             size_max=10,
             zoom=5,
-            mapbox_style=map_col,
+            mapbox_style='carto-darkmatter',
             title="Event Map"
         )
         st.plotly_chart(fig_map)
