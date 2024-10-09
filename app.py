@@ -250,7 +250,7 @@ st.subheader("Event Map")
 map_tog = st.toggle("Static / Animated")
 if map_tog:
     if not filtered_df.empty:
-        fig_map = px.scatter_mapbox(
+        fig_map = px.density_mapbox(
             filtered_df,
             lat="latitude",
             lon="longitude",
