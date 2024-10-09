@@ -208,7 +208,8 @@ df = get_data()
 filtered_df = df.copy()
     
 # Streamlit App
-st.title("Middle East Event Visualization Dashboard")
+st.set_page_config(layout="wide")
+st.title("Matic's Middle East Event Visualization Dashboard")
 
 # Multi-select for countries
 countries = st.multiselect("Select countries", options=filtered_df['country'].unique())
@@ -240,21 +241,38 @@ def calculate_pct_change(df, window=1, use_rolling_sum=False):
 
 # Map Visualization
 st.subheader("Event Map")
-if not filtered_df.empty:
-    fig_map = px.scatter_mapbox(
-        filtered_df,
-        lat="latitude",
-        lon="longitude",
-        animation_frame = "event_date",
-        hover_name="event_id_cnty",
-        hover_data=["event_date", "event_type","actor_group"],
-        color="country" if len(countries) > 1 else "event_type",
-        size_max=10,
-        zoom=5,
-        mapbox_style="carto-positron",
-        title="Event Map"
-    )
-    st.plotly_chart(fig_map)
+map_tog = st.toggle("Static / Animated")
+if map_tog:
+    if not filtered_df.empty:
+        fig_map = px.scatter_mapbox(
+            filtered_df,
+            lat="latitude",
+            lon="longitude",
+            animation_frame = "event_date",
+            hover_name="event_id_cnty",
+            hover_data=["event_date", "event_type","actor_group"],
+            color="country" if len(countries) > 1 else "event_type",
+            size_max=10,
+            zoom=5,
+            mapbox_style="carto-positron",
+            title="Event Map"
+        )
+        st.plotly_chart(fig_map)
+if not map_tog:
+    if not filtered_df.empty:
+        fig_map = px.scatter_mapbox(
+            filtered_df,
+            lat="latitude",
+            lon="longitude",
+            hover_name="event_id_cnty",
+            hover_data=["event_date", "event_type","actor_group"],
+            color="country" if len(countries) > 1 else "event_type",
+            size_max=10,
+            zoom=5,
+            mapbox_style="carto-positron",
+            title="Event Map"
+        )
+        st.plotly_chart(fig_map)
 
     # Time Series Line Chart
     st.subheader("Time Series of Events")
