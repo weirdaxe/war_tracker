@@ -7,6 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from os import listdir
 from os.path import isfile, join
+import datetime
 
 actor_map = mapping = {
     "Protesters (Iran)": "Protestors - Iran",
@@ -206,7 +207,13 @@ def get_data(actor_map=actor_map):
 
 df = get_data()
 filtered_df = df.copy()
-    
+
+dark_map = datetime.datetime.now().time() > datetime.time(18,0)
+if dark_map:
+    map_col = 'carto-darkmatter'
+else:
+    map_col = 'carto- positron'
+
 # Streamlit App
 st.title("Matic's Middle East Event Visualization Dashboard")
 
@@ -253,7 +260,7 @@ if map_tog:
             color="country" if len(countries) > 1 else "event_type",
             size_max=10,
             zoom=5,
-            mapbox_style="carto-positron",
+            mapbox_style=map_col,
             title="Event Map"
         )
         st.plotly_chart(fig_map)
@@ -266,9 +273,9 @@ if not map_tog:
             hover_name="event_id_cnty",
             hover_data=["event_date", "event_type","actor_group"],
             color="country" if len(countries) > 1 else "event_type",
-            size_max=10,
-            zoom=5,
-            mapbox_style="carto-positron",
+            size_max=20,
+            zoom=8,
+            mapbox_style=map_col,
             title="Event Map"
         )
         st.plotly_chart(fig_map)
