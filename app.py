@@ -254,20 +254,20 @@ if map_tog:
             filtered_df,
             lat="latitude",
             lon="longitude",
-            animation_frame = "event_date",
+            #animation_frame = "event_date",
             hover_name="event_id_cnty",
             hover_data=["event_date", "event_type","actor_group"],
             #color="country" if len(countries) > 1 else "event_type",
-            size_max=20,
+            #size_max=20,
             zoom=4,
             mapbox_style='carto-positron',
             title="Event Map",
             height=800,
             width = 1800
         )
-        fig_map.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 150
-        fig_map.layout.updatemenus[0].buttons[0].args[1]['transition']['duration'] = 50
-        fig_map.update_geos(resolution=50)
+        #fig_map.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 150
+        #fig_map.layout.updatemenus[0].buttons[0].args[1]['transition']['duration'] = 50
+        #fig_map.update_geos(resolution=50)
         st.plotly_chart(fig_map)
 if not map_tog:
     if not filtered_df.empty:
