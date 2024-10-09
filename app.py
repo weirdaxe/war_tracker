@@ -162,7 +162,7 @@ actor_map = mapping = {
     "SLA: Sudan Liberation Army - SLAM": "Sudan - SLAM",
 }
 
-
+st.set_page_config(layout="wide")
 @st.cache_data  # 👈 Add the caching decorator
 def load_data(actor_map=actor_map,path = "war_tracker.csv"):
     df = pd.read_csv(path)
@@ -208,7 +208,6 @@ df = get_data()
 filtered_df = df.copy()
     
 # Streamlit App
-st.set_page_config(layout="wide")
 st.title("Matic's Middle East Event Visualization Dashboard")
 
 # Multi-select for countries
