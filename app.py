@@ -8,6 +8,16 @@ import plotly.graph_objects as go
 from os import listdir
 from os.path import isfile, join
 import datetime
+from PIL import Image
+
+from utils import utils
+from visualization import visualization
+import visualization as vis
+from page_elements import page_elements
+
+u = utils()
+v = visualization()
+pe = page_elements()
 
 actor_map = mapping = {
     "Protesters (Iran)": "Protestors - Iran",
@@ -162,8 +172,22 @@ actor_map = mapping = {
     "Al Malazi Tribal Militia (Yemen)": "Yemen - Tribal Militia",
     "SLA: Sudan Liberation Army - SLAM": "Sudan - SLAM",
 }
+im = Image.open("media/warfare.ico")
+logo = Image.open("media/Logo_large.png")
+logo_collapsed = Image.open("media/warfare.png")
+st.set_page_config(page_title = "Conflict Tracker", layout="wide", page_icon = im)
 
-st.set_page_config(layout="wide")
+st.logo(image=logo, size="large", icon_image=logo_collapsed
+)
+st.html("""
+  <style>
+    [alt=Logo] {
+        
+      height: 5.75rem;
+    }
+  </style>
+        """)
+
 @st.cache_data  # 👈 Add the caching decorator
 def load_data(actor_map=actor_map,path = "war_tracker.csv"):
     df = pd.read_csv(path)
@@ -173,8 +197,6 @@ def load_data(actor_map=actor_map,path = "war_tracker.csv"):
     df['longitude'] = pd.to_numeric(df['longitude'])
     df['actor_group'] = df['actor1'].map(actor_map)
     return df
-
-#df = load_data()
 
 @st.cache_data(show_spinner="Preparing the Data", persist=True)
 def get_data(actor_map=actor_map):
@@ -203,156 +225,200 @@ def get_data(actor_map=actor_map):
     df['actor_group'] = df['actor1'].map(actor_map)
     
     return df
-#df.to_csv("war_tracker.csv")
 
 df = get_data()
-filtered_df = df.copy()
+# filtered_df = df.copy()
 
-dark_map = datetime.datetime.now().time() > datetime.time(18,0)
-if dark_map:
-    map_col = 'carto-darkmatter'
-else:
-    map_col = 'carto-positron'
+# dark_map = datetime.datetime.now().time() > datetime.time(18,0)
+# if dark_map:
+#     map_col = 'carto-darkmatter'
+# else:
+#     map_col = 'carto-positron'
 
 # Streamlit App
-st.title("Matic's Middle East Event Visualization Dashboard")
+st.title("Conflict Visualization Dashboard")
 
-# Multi-select for countries
-countries = st.multiselect("Select countries", options=filtered_df['country'].unique())
+if "filtered_df" in st.session_state:
+    filtered_df = st.session_state["filtered_df"]
 
-if countries:
-    filtered_df = filtered_df[filtered_df['country'].isin(countries)]
+
+button, countries, event_types, actors, time_range = pe.sidebar(df)
+
+if button:
+    filtered_df = df.copy()
     
-# Multi-select for event types
-event_types = st.multiselect("Select event types", options=filtered_df['event_type'].unique())
-
-if event_types:
-    filtered_df = filtered_df[filtered_df['event_type'].isin(event_types)]
+    st.session_state['countries'] = countries
+    st.session_state['event_types'] = event_types
+    st.session_state['actors'] = actors
+    st.session_state['time_range'] = time_range
     
-actors = st.multiselect("Select Actor", options=filtered_df['actor_group'].unique())
+    if countries:
+        filtered_df = filtered_df[filtered_df['country'].isin(countries)]
+    if event_types:
+        filtered_df = filtered_df[filtered_df["sub_event_type"].isin(event_types)]
+    if actors:
+        filtered_df = filtered_df[filtered_df['actor_group'].isin(actors)]
+    if time_range:
+        filtered_df = filtered_df[(filtered_df['event_date']>=time_range[0]) & (filtered_df['event_date']<=time_range[1])]
+    st.session_state["filtered_df"] = filtered_df
 
-if actors:
-    filtered_df = filtered_df[filtered_df['actor_group'].isin(actors)]
-
-def calculate_pct_change(df, window=1, use_rolling_sum=False):
-    if use_rolling_sum:
-        # Calculate rolling sum for the specified window
-        df['event_count'] = df.groupby('country')['event_count'].transform(lambda x: x.rolling(window).sum())
-        # Calculate percentage change between the last 'window' sum and the sum before that
-        df['event_count'] = df.groupby('country')['event_count'].transform(lambda x: x.pct_change(periods=window))
-    else:
-        # Calculate percentage change with the specified window
-        df['event_count'] = df.groupby('country')['event_count'].transform(lambda x: x.pct_change(periods=window))
-    return df
-
-# Map Visualization
-st.subheader("Event Map")
-map_tog = st.toggle("Static / Animated")
-if map_tog:
-    if not filtered_df.empty:
-        fig_map = px.density_mapbox(
-            filtered_df,
-            lat="latitude",
-            lon="longitude",
-            #animation_frame = "event_date",
-            hover_name="event_id_cnty",
-            hover_data=["event_date", "event_type","actor_group"],
-            #color="actor_group" if len(countries) > 1 else "event_type",
-            #size_max=20,
-            zoom=4,
-            mapbox_style='carto-positron',
-            title="Event Map",
-            height=800,
-            width = 1800
-        )
-        #fig_map.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 150
-        #fig_map.layout.updatemenus[0].buttons[0].args[1]['transition']['duration'] = 50
-        #fig_map.update_geos(resolution=50)
-        st.plotly_chart(fig_map)
-if not map_tog:
-    if not filtered_df.empty:
-        fig_map = px.scatter_mapbox(
-            filtered_df,
-            lat="latitude",
-            lon="longitude",
-            hover_name="event_id_cnty",
-            hover_data=["event_date", "event_type","actor_group"],
-            color="actor_group" if len(countries) > 1 else "event_type",
-            size_max=20,
-            zoom=4,
-            mapbox_style='carto-positron',
-            title="Event Map",
-            height=800,
-            width = 1800
-        )
-        st.plotly_chart(fig_map)
-
-    # Time Series Line Chart
-    st.subheader("Time Series of Events")
+#with st.container(height=500,border=False):
+try:
+# if 1==1:
+    breaker = filtered_df.iloc[0,0]
     
-    # Selector for moving average or rolling sum
-    analysis_dur = st.selectbox("Select analysis type", options=["Raw Data", "4 Week", "8 Week", "12 Week"],)
-    analysis_tpy = st.radio("Analysis",["Raw","Moving Average", "Rolling Sum", "W/W Change","M/M Rolling Change"],)
-       
-    # Prepare time series data
-    time_series_df = filtered_df.groupby(['event_date', 'country']).size().reset_index(name='event_count')
+    st.subheader("Data Panel")
 
-    # Resampling based on analysis type
-    if analysis_tpy == "Moving Average":
-        if analysis_dur == "4 Week":
-            time_series_df["event_count"] = time_series_df.groupby('country')['event_count'].transform(lambda x: x.rolling(window=4).mean())
-        elif analysis_dur == "8 Week":
-            time_series_df["event_count"] = time_series_df.groupby('country')['event_count'].transform(lambda x: x.rolling(window=8).mean())
-        elif analysis_dur == "12 Week":
-            time_series_df["event_count"] = time_series_df.groupby('country')['event_count'].transform(lambda x: x.rolling(window=12).mean())
-        else:
-            pass
-    
-    if analysis_tpy == "Rolling Sum":
-        if analysis_dur == "4 Week":
-            time_series_df["event_count"] = time_series_df.groupby('country')['event_count'].transform(lambda x: x.rolling(window=4).sum())
-        elif analysis_dur == "8 Week":
-            time_series_df["event_count"] = time_series_df.groupby('country')['event_count'].transform(lambda x: x.rolling(window=8).sum())
-        elif analysis_dur == "12 Week":
-            time_series_df["event_count"] = time_series_df.groupby('country')['event_count'].transform(lambda x: x.rolling(window=12).sum())
-        else:
-            pass
+    dpc1, dpc2 = st.columns([3,2])
+    with dpc1:
+        with st.container():
+            st.write(f"**Total Events:** {str(filtered_df.shape[0])}")
+        with st.container():
+            c11, c12, c13 = st.columns(3)
+            with c11:
+                st.write('**Unique Countries:**', str(filtered_df['country'].nunique()))
+                st.write(", ".join(filtered_df["country"].unique()))
+            with c12:
+                st.write('**Unique Event Types:**', str(filtered_df["sub_event_type"].nunique()))
+                st.write(", ".join(filtered_df["sub_event_type"].unique()))
+            with c13:
+                st.write('**Unique Actors:**', str(filtered_df['actor_group'].nunique()))
+                st.write(", ".join(filtered_df['actor_group'].unique()))
 
-    if analysis_tpy == "M/M Change":
-        if analysis_dur == "Raw":
-            time_series_df = calculate_pct_change(time_series_df, window=1, use_rolling_sum=False)
-        elif analysis_dur == "4 Week":
-            time_series_df = calculate_pct_change(time_series_df, window=4, use_rolling_sum=False)
-        elif analysis_dur == "8 Week":
-            time_series_df = calculate_pct_change(time_series_df, window=8, use_rolling_sum=False)
-        elif analysis_dur == "12 Week":
-            time_series_df = calculate_pct_change(time_series_df, window=12, use_rolling_sum=False)
-        else:
-            pass
+        
+        # Event type distribution
+        st.subheader('Event Type Distribution')
+        event_type_counts = filtered_df.groupby(["country","sub_event_type"]).size().reset_index(name="event_count")#["sub_event_type"].value_counts()
+        st.bar_chart(event_type_counts, y= "event_count", x="sub_event_type", color="country",
+                     horizontal=True,stack=True,x_label="Event Count",y_label="Event Type")
 
-    if analysis_tpy == "M/M Rolling Change":
-        if analysis_dur == "Raw":
-            time_series_df = calculate_pct_change(time_series_df, window=1, use_rolling_sum=True)
-        elif analysis_dur == "4 Week":
-            time_series_df = calculate_pct_change(time_series_df, window=4, use_rolling_sum=True)
-        elif analysis_dur == "8 Week":
-            time_series_df = calculate_pct_change(time_series_df, window=8, use_rolling_sum=True)
-        elif analysis_dur == "12 Week":
-            time_series_df = calculate_pct_change(time_series_df, window=12, use_rolling_sum=True)
+    with dpc2:
+        # Pie Chart if only 1 country selected
+        if len(st.session_state['countries'])==1:
+            # Generate Pie Chart with type of event in %
+            if len(st.session_state['event_types']) ==1:
+                # Generate chart base on perpitrator groups
+                fig_pie = px.pie(u.aggregate_events(filtered_df.groupby(['actor_group']).size().reset_index(name="value"), threshold = 0.01,group="actor_group"), 
+                 values='value', names='actor_group', title='Actor Breakdown')
+            else:
+                # Generate chart based on event types
+                fig_pie = px.pie(u.aggregate_events(filtered_df.groupby(["sub_event_type"]).size().reset_index(name="value"),threshold=0.01,group="sub_event_type"), 
+                 values='value', names='sub_event_type', title='Event Breakdown')
         else:
-            pass
+            # Plot events by country                                ["sub_event_type"].count()
+            fig_pie = px.pie(u.aggregate_events(filtered_df.groupby(["country"]).size().reset_index(name="value"),threshold=0.01, group="country"), 
+                 values='value', names='country', title='Activity in Countries')
             
-
-    # Plotting
-    fig_time_series = px.line(time_series_df, 
-                               x='event_date', 
-                               y='event_count', 
-                               color='country', 
-                               title='Events Over Time', height=800, width=1800,
-                               labels={'event_date': 'Date', 'event_count': 'Number of Events'})
+        st.plotly_chart(fig_pie)
+    st.divider()
+    # Map Visualization
+    col1, col2, col3 = st.columns([5,2,2])
+    with col1:
+        st.subheader("Event Map View")
+    with col2:
+        anim_tog = st.toggle("Static / Animated")
+    with col3:
+        dens_tog = st.toggle("Events / Density")
+    if not dens_tog:
+        if not anim_tog:
+            if not filtered_df.empty: 
+                fig_map_static = vis.scatter_map_static(filtered_df)
+                st.plotly_chart(fig_map_static[0])    
+        if anim_tog:
+            if not filtered_df.empty:
+                fig_map_anim = vis.scatter_map_anim(filtered_df)
+                st.plotly_chart(fig_map_anim[0])
     
-    # Show the plot
-    st.plotly_chart(fig_time_series)
+    @st.cache_data(show_spinner = "Preparing Data")
+    def prep_data(df,area_size_km = 10, time=False):
+        return u.geo_group(df, area_size_km = area_size_km, time=time)
 
+    @st.cache_data(show_spinner = "Wrangling Data")
+    def fil_data(df,rolling_window=1,time_gran="Daily"):
+        return u.geo_filter(df, rolling_window, time_gran)
+    
+    if dens_tog:
+        area_size = st.slider("Select Grouped Area (km) for density calculation.",1, 100, 10, help="""Aggregate events by distance.\nIf 10 is selected this will look for and sum the number of events in a 10x10 km area.\nLower for more granularity, higher for more of a highlevel overview""")
+
+        if not anim_tog:
+            if not filtered_df.empty:
+                density_data = prep_data(filtered_df, area_size_km = area_size, time=False)
+                fig_density_map_static = vis.density_map_static(density_data)
+                st.plotly_chart(fig_density_map_static[0])
+ 
+        if anim_tog:
+            st.session_state["time_granularity_map"] = st.selectbox("Time Granularity",options=["Daily","Weekly", "Monthly","Annually"], key="map", help="Select the unit of time, events are summed up")
+            rolling_window_map = {"Daily":(1,30),"Weekly":(1,52), "Monthly":(1,12), "Quarterly":(1,4),"Annually":(1,10)}
+            st.session_state["rolling_window_map"] = st.slider("Rolling Window (Observations)", rolling_window_map[st.session_state["time_granularity_map"]][0],rolling_window_map[st.session_state["time_granularity_map"]][1],key="map_rw", help="Select the rolling window, the calculation is a rolling sum")
+            
+            if not filtered_df.empty:
+                density_data = prep_data(filtered_df, area_size_km = area_size, time=True)
+                density_data = fil_data(density_data,rolling_window=st.session_state["rolling_window_map"],time_gran=st.session_state["time_granularity_map"])
+                fig_density_map_anim = vis.density_map_anim(density_data)
+                st.plotly_chart(fig_density_map_anim[0])
+ 
+    st.divider()
+    st.subheader("Time Series View")
+    
+    #@st.cache_data
+    def ts_df(filtered_df):
+        return filtered_df.groupby(['event_date', st.session_state["tracking_target_ts"]]).size().reset_index(name="event_count")
+                                    #'country',"actor_group","sub_event_type"]).size().reset_index(name='event_count')
+    
+    time_series_df = ts_df(filtered_df)
+    # Prepare time series data
+    #time_series_df = filtered_df.groupby(['event_date', 'country']).size().reset_index(name='event_count')
+
+    if st.session_state["time_granularity_ts"] == "Weekly":
+        #time_series_df.groupby("country").resample("D",on="event_date").size().reset_index(name="event_count")
+        time_series_df = time_series_df.groupby(st.session_state["tracking_target_ts"]).resample("W-MON",on="event_date").sum()["event_count"].reset_index()
+    
+    elif st.session_state["time_granularity_ts"] == "Monthly":
+        time_series_df = time_series_df.groupby(st.session_state["tracking_target_ts"]).resample("ME",on="event_date").sum()["event_count"].reset_index()
+    
+    elif st.session_state["time_granularity_ts"] == "Quarterly":
+        time_series_df = time_series_df.groupby(st.session_state["tracking_target_ts"]).resample("Q",on="event_date",).sum()["event_count"].reset_index()
+    
+    elif st.session_state["time_granularity_ts"] == "Annually":
+        time_series_df = time_series_df.groupby(st.session_state["tracking_target_ts"]).resample("Y",on="event_date").sum()["event_count"].reset_index()
+    
+  
+    # Resampling based on analysis type
+    if st.session_state["analysis_tpy"] == "Moving Average":
+        if st.session_state["rolling_window_ts"] != 1:
+            time_series_df["event_count"] = time_series_df.groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.rolling(window=st.session_state["rolling_window_ts"]).mean())
+    
+    if st.session_state["analysis_tpy"] == "Rolling Sum":
+        if st.session_state["rolling_window_ts"] != 1:
+            time_series_df["event_count"] = time_series_df.groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.rolling(window=st.session_state["rolling_window_ts"]).sum())
+
+    if st.session_state["analysis_tpy"] == "O/O Change":
+        if st.session_state["rolling_window_ts"] != 1:
+            time_series_df = u.calculate_pct_change(time_series_df, window=st.session_state["rolling_window_ts"], use_rolling_sum=False)
+    
+    if st.session_state["analysis_tpy"] == "O/O Rolling Change":
+        if st.session_state["rolling_window_ts"] != 1:
+            time_series_df = u.calculate_pct_change(time_series_df, window=st.session_state["rolling_window_ts"], use_rolling_sum=True)
+    
+    if not st.session_state["chart_type"]:        
+        fig_ts_line = vis.line_chart(time_series_df)
+        st.plotly_chart(fig_ts_line)
+    
+    if st.session_state["chart_type"]:
+        if st.session_state["bar_tpy"] == "Bar":
+            fig_ts_bar = vis.bar_chart(time_series_df, barmode="group")
+        
+        elif st.session_state["bar_tpy"] == "Stacked column":
+            fig_ts_bar = vis.bar_chart(time_series_df, barmode="relative")
+        
+        elif st.session_state["bar_tpy"] == "Stacked Relative":
+            time_series_df = u.make_ts_relative(time_series_df)
+            fig_ts_bar = vis.bar_chart(time_series_df, barmode="relative")
+        else:
+            pass
+        st.plotly_chart(fig_ts_bar)
+
+except:
+    st.info("Please select your filters and click apply")
 else:
     st.write("No data available for the selected filters.")
