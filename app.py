@@ -272,6 +272,8 @@ try:
 
     dpc1, dpc2 = st.columns([3,2])
     with dpc1:
+        # with st.container():
+        #     st.write(f"**Total Events:** {str(filtered_df.shape[0])}")
         with st.container():
             c11, c12, c13 = st.columns(3)
             with c11:
@@ -281,8 +283,10 @@ try:
                 st.write('**Unique Countries:**', str(filtered_df['country'].nunique()))
                 st.write(", ".join(filtered_df["country"].unique()))
             with c13:
+                #uniq_evnt = filtered_df.groupby(["sub_event_type"]).size().reset_index(name="count")
                 st.write('**Unique Event Types:**', str(filtered_df["sub_event_type"].nunique()))
-                st.write(", ".join(filtered_df["sub_event_type"].unique()))
+                uniq_evnt = filtered_df.groupby(["sub_event_type"]).size().reset_index(name="count")
+                st.write(", ".join(uniq_evnt.sort_values("count",ascending=False)["sub_event_type"].to_list()[:5]))
         with st.container():
             c14, c15 = st.columns([1,2])
             with c14:
@@ -295,7 +299,8 @@ try:
         # Event type distribution
         st.subheader('Event Type Distribution')
         event_type_counts = filtered_df.groupby(["country","sub_event_type"]).size().reset_index(name="event_count")#["sub_event_type"].value_counts()
-        st.bar_chart(event_type_counts, y= "event_count", x="sub_event_type", color="country",
+        #st.write(event_type_counts.sort_values("event_count",ascending=False)[:5])
+        st.bar_chart(event_type_counts.sort_values("event_count",ascending=False)[:5], y= "event_count", x="sub_event_type", color="country",
                      horizontal=True,stack=True,x_label="Event Count",y_label="Event Type")
 
     with dpc2:
