@@ -264,8 +264,8 @@ if button:
     st.session_state["filtered_df"] = filtered_df
 
 #with st.container(height=500,border=False):
-# try:
-if 1==1:
+try:
+# if 1==1:
     breaker = filtered_df.iloc[0,0]
     
     st.subheader("Data Panel")
@@ -424,7 +424,7 @@ if 1==1:
             pass
         st.plotly_chart(fig_ts_bar)
 
-# except:
-#     st.info("Please select your filters and click apply")
-else:
-    st.write("No data available for the selected filters.")
+except:
+    st.info("Please select your filters and click apply.\nIf you have already done so there might be an invalid filter combination - please select a different combination of filters.")
+# else:
+#     st.write("No data available for the selected filters.")
