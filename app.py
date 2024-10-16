@@ -272,18 +272,23 @@ if 1==1:
     dpc1, dpc2 = st.columns([3,2])
     with dpc1:
         with st.container():
-            st.write(f"**Total Events:** {str(filtered_df.shape[0])}")
-        with st.container():
             c11, c12, c13 = st.columns(3)
             with c11:
+                st.write(f"**Total Events:** {str(filtered_df.shape[0])}")
+                st.write(f"")#{str(filtered_df.shape[0])}")
+            with c12:
                 st.write('**Unique Countries:**', str(filtered_df['country'].nunique()))
                 st.write(", ".join(filtered_df["country"].unique()))
-            with c12:
+            with c13:
                 st.write('**Unique Event Types:**', str(filtered_df["sub_event_type"].nunique()))
                 st.write(", ".join(filtered_df["sub_event_type"].unique()))
-            with c13:
-                st.write('**Unique Actors:**', str(filtered_df['actor_group'].nunique()))
-                st.write(", ".join(filtered_df['actor_group'].unique()))
+        with st.container():
+            c14, c15 = st.columns([1,2])
+            with c14:
+                st.write('**Unique Actors:**', str(filtered_df['actor_group'].dropna().nunique()))
+                uniq_act = filtered_df.groupby(['actor_group']).size().reset_index(name="count")
+            with c15:
+                st.write(f"**Top Actors:**",", ".join(uniq_act.sort_values("count",ascending=False)["actor_group"].to_list()[:5]))
 
         
         # Event type distribution
