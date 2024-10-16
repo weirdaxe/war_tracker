@@ -72,9 +72,9 @@ def density_map_anim(density_data):
                         height=800,
                         width=1800
                     )
-    fig_map.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 200
-    fig_map.layout.updatemenus[0].buttons[0].args[1]['transition']['duration'] = 75
-    fig_map.update_geos(projection_type="equirectangular", visible=True, resolution=50)
+    #fig_map.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 200
+    #fig_map.layout.updatemenus[0].buttons[0].args[1]['transition']['duration'] = 75
+    #fig_map.update_geos(projection_type="equirectangular", visible=True, resolution=50)
 
     chart_dict[0] = fig_map
     return chart_dict
