@@ -205,6 +205,7 @@ def get_data(actor_map=actor_map):
     def safe_eval(text):
         # Replace 'true' with 'True' and 'false' with 'False'
         text = text.replace('true', 'True')
+        text = text.replace("\/", " / ")
         return text
     
     with open("data/"+onlyfiles[0],"r") as file:
