@@ -228,7 +228,7 @@ def get_data(region, actor_map=actor_map):
         df['actor_group'] = df['actor1'].map(actor_map)
     else:
         df['actor_group'] = df['actor1']
-    
+    df = df.drop_duplicates(subset=["event_id_cnty"])
 #     with open("data/"+onlyfiles[0],"r") as file:
 #         for line in file:
 #             line = safe_eval(line)
