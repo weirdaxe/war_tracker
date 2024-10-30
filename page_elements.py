@@ -15,12 +15,12 @@ class page_elements:
             
             # region = st.selectbox("Select Region",options=["MENA","SSA","CIS CEE"], help="Select geographical region to pull data from")
 
-            countries = st.multiselect("Select countries", options=df['country'].unique().sort_values(),help="Country where the event happened")
-            event_types = st.multiselect("Select event types", options=df["sub_event_type"].unique())
+            countries = st.multiselect("Select countries", options=df['country'].value_counts().index.unique(),help="Country where the event happened")
+            event_types = st.multiselect("Select event types", options=df["sub_event_type"].value_counts().index.unique())
             #try:
             #    actors = st.multiselect("Select Actor", options=st.session_state["filtered_df"]['actor_group'].unique())
             #except:
-            actors = st.multiselect("Select Actor", options=df['actor_group'].unique(), help="Actor responsible for the event")
+            actors = st.multiselect("Select Actor", options=df['actor_group'].value_counts().index.unique(), help="Actor responsible for the event")
             
             time_range = st.slider("Date Range", min_value = df["event_date"].min().to_pydatetime(), 
                                    max_value = df["event_date"].max().to_pydatetime(),value=(datetime.datetime(2023, 10, 7, 0,0), df["event_date"].max().to_pydatetime()),)
