@@ -14,7 +14,7 @@ u = utils()
 def scatter_map_anim(filtered_df):
     chart_dict = {}
     fig_map = px.scatter_mapbox(
-        filtered_df,
+        filtered_df.sort_values("event_date").dropna(),
         lat="latitude",
         lon="longitude",
         animation_frame = "event_date",
@@ -38,7 +38,7 @@ def scatter_map_anim(filtered_df):
 @st.cache_data(hash_funcs={dict: lambda _: None},show_spinner="Generating Plot")
 def scatter_map_static(filtered_df):
     fig_map = px.scatter_mapbox(
-        filtered_df,
+        filtered_df.sort_values("event_date").dropna(),
         lat="latitude",
         lon="longitude",
         hover_name="event_id_cnty",
@@ -59,7 +59,7 @@ def scatter_map_static(filtered_df):
 def density_map_anim(density_data):
     chart_dict = {}
     fig_map = px.density_mapbox(
-                        density_data,
+                        density_data.sort_values("event_date").dropna(),
                         lat="latitude",
                         lon="longitude",
                         z = "sub_event_type",
@@ -82,7 +82,7 @@ def density_map_anim(density_data):
 @st.cache_data(hash_funcs={dict: lambda _: None},show_spinner = "Generating Plot")
 def density_map_static(density_data):
     fig_map = px.density_mapbox(
-                        density_data,
+                        density_data.sort_values("event_date").dropna(),
                         lat="latitude",
                         lon="longitude",
                         z = "sub_event_type",

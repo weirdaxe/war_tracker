@@ -32,12 +32,12 @@ class utils:
     def calculate_pct_change(self, df, window=1, use_rolling_sum=False):
         if use_rolling_sum:
             # Calculate rolling sum for the specified window
-            df['event_count'] = df.groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.rolling(window).sum())
+            df['event_count'] = df.sort_values("event_date").groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.rolling(window).sum())
             # Calculate percentage change between the last 'window' sum and the sum before that
-            df['event_count'] = df.groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.pct_change(periods=window))
+            df['event_count'] = df.sort_values("event_date").groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.pct_change(periods=window))
         else:
             # Calculate percentage change with the specified window
-            df['event_count'] = df.groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.pct_change(periods=window))
+            df['event_count'] = df.sort_values("event_date").groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.pct_change(periods=window))
         return df
 
     def geo_time_filter(self, df, frequency):
