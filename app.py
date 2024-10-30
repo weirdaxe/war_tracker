@@ -262,7 +262,7 @@ with st.sidebar:
     region = st.selectbox("Select Region",options=["MENA","SSA","CIS CEE"], help="Select geographical region to pull data from")
 
 df = get_data(region=region, actor_map=actor_map)
-
+st.write(df.sample(5))
 button, countries, event_types, actors, time_range = pe.sidebar(df)
 
 
