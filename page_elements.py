@@ -60,7 +60,7 @@ class page_elements:
             st.write("")
             st.write("")
             footer_html = """<div style='text-align: left;'>
-              <p>Developed by <b>Matic</b></p>
+              <p>Developed by <b>Matic</b> using <b>ACLED Dataset</b></p>
             </div>"""
             st.markdown(footer_html, unsafe_allow_html=True)
         return button, countries, event_types, actors, time_range

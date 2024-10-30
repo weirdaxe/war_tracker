@@ -419,11 +419,11 @@ try:
     # Resampling based on analysis type
     if st.session_state["analysis_tpy"] == "Moving Average":
         if st.session_state["rolling_window_ts"] != 1:
-            time_series_df["event_count"] = time_series_df.groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.rolling(window=st.session_state["rolling_window_ts"]).mean())
+            time_series_df["event_count"] = time_series_df.sort_values("event_date").groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.rolling(window=st.session_state["rolling_window_ts"]).mean())
     
     if st.session_state["analysis_tpy"] == "Rolling Sum":
         if st.session_state["rolling_window_ts"] != 1:
-            time_series_df["event_count"] = time_series_df.groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.rolling(window=st.session_state["rolling_window_ts"]).sum())
+            time_series_df["event_count"] = time_series_df.sort_values("event_date").groupby(st.session_state["tracking_target_ts"])['event_count'].transform(lambda x: x.rolling(window=st.session_state["rolling_window_ts"]).sum())
 
     if st.session_state["analysis_tpy"] == "O/O Change":
         if st.session_state["rolling_window_ts"] != 1:
