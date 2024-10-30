@@ -256,7 +256,7 @@ if "filtered_df" in st.session_state:
     filtered_df = st.session_state["filtered_df"]
 
 
-with st.sidebar():
+with st.sidebar:
     st.title("Event Filters", help="Filter the dataset based on various factors. Factors are not applied untill the 'Apply filters' button is pressed")
     region = st.selectbox("Select Region",options=["MENA","SSA","CIS CEE"], help="Select geographical region to pull data from")
 
