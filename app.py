@@ -199,35 +199,48 @@ def load_data(actor_map=actor_map,path = "war_tracker.csv"):
     return df
 
 @st.cache_data(show_spinner="Preparing the Data", persist=True)
-def get_data(actor_map=actor_map):
-    mypath = "data/"
-    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-    def safe_eval(text):
-        # Replace 'true' with 'True' and 'false' with 'False'
-        text = text.replace('true', 'True')
-        text = text.replace("\/", " / ")
-        return text
+def get_data(region, actor_map=actor_map):
     
-    with open("data/"+onlyfiles[0],"r") as file:
-        for line in file:
-            line = safe_eval(line)
-            df = pd.DataFrame.from_dict(eval(line)["data"])
-            
+    if region=="MENA":
+        mypath = "data/MENA/"
+    elif region=="SSA":
+        mypath = "data/SSA/"
+    elif region=="CIS CEE":
+        mypath = "data/CIS_CEE/"
+        
+    onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+
+    with open(mypath+onlyfiles[0],"r") as file:
+        d = json.load(file)
+        df = pd.DataFrame.from_dict(d)
+
     for file_name in onlyfiles[1:]:
-        with open("data/"+file_name, "r") as file:
-            for line in file:
-                line = safe_eval(line)
-                dict_ = eval(line)
-        df = pd.concat([df, pd.DataFrame.from_dict(dict_["data"])])
+        with open(mypath+file_name, "r") as file:
+            d = json.load(file)
+        df = pd.concat([df, pd.DataFrame.from_dict(d)])
+    
     df = df.reset_index(drop=True)
     df['event_date'] = pd.to_datetime(df['event_date'])
     df['latitude'] = pd.to_numeric(df['latitude'])
     df['longitude'] = pd.to_numeric(df['longitude'])
-    df['actor_group'] = df['actor1'].map(actor_map)
+    if region=="MENA":
+        df['actor_group'] = df['actor1'].map(actor_map)
+    else:
+        df['actor_group'] = df['actor1']
     
+#     with open("data/"+onlyfiles[0],"r") as file:
+#         for line in file:
+#             line = safe_eval(line)
+#             df = pd.DataFrame.from_dict(eval(line)["data"])
+            
+#     for file_name in onlyfiles[1:]:
+#         with open("data/"+file_name, "r") as file:
+#             for line in file:
+#                 line = safe_eval(line)
+#                 dict_ = eval(line)
+#         df = pd.concat([df, pd.DataFrame.from_dict(dict_["data"])])    
     return df
 
-df = get_data()
 # filtered_df = df.copy()
 
 # dark_map = datetime.datetime.now().time() > datetime.time(18,0)
@@ -243,7 +256,15 @@ if "filtered_df" in st.session_state:
     filtered_df = st.session_state["filtered_df"]
 
 
+with st.sidebar():
+    st.title("Event Filters", help="Filter the dataset based on various factors. Factors are not applied untill the 'Apply filters' button is pressed")
+    region = st.selectbox("Select Region",options=["MENA","SSA","CIS CEE"], help="Select geographical region to pull data from")
+
+df = get_data(region=region, actor_map=actor_map)
+
 button, countries, event_types, actors, time_range = pe.sidebar(df)
+
+
 
 if button:
     filtered_df = df.copy()

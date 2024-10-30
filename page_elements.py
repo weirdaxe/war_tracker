@@ -11,7 +11,9 @@ class page_elements:
     
     def sidebar(self,df):
         with st.sidebar:
-            st.title("Event Filters", help="Filter the dataset based on various factors. Factors are not applied untill the 'Apply filters' button is pressed")
+            # st.title("Event Filters", help="Filter the dataset based on various factors. Factors are not applied untill the 'Apply filters' button is pressed")
+            
+            # region = st.selectbox("Select Region",options=["MENA","SSA","CIS CEE"], help="Select geographical region to pull data from")
 
             countries = st.multiselect("Select countries", options=df['country'].unique(),help="Country where the event happened")
             event_types = st.multiselect("Select event types", options=df["sub_event_type"].unique())
