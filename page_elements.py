@@ -15,7 +15,7 @@ class page_elements:
             
             # region = st.selectbox("Select Region",options=["MENA","SSA","CIS CEE"], help="Select geographical region to pull data from")
 
-            countries = st.multiselect("Select countries", options=df['country'].unique(),help="Country where the event happened")
+            countries = st.multiselect("Select countries", options=df['country'].unique().sort_values(),help="Country where the event happened")
             event_types = st.multiselect("Select event types", options=df["sub_event_type"].unique())
             #try:
             #    actors = st.multiselect("Select Actor", options=st.session_state["filtered_df"]['actor_group'].unique())
