@@ -14,9 +14,9 @@ u = utils()
 def scatter_map_anim(filtered_df):
     chart_dict = {}
     fig_map = px.scatter_mapbox(
-        filtered_df,
+        filtered_df.sort_values("event_date").dropna(),
         lat="latitude",
-        lon="longitude",
+        lon="longitude", 
         animation_frame = "event_date",
         # range_color = (min(filtered_df["event_type"]), max(filtered_df["event_type"])),
         hover_name="event_id_cnty",
@@ -38,7 +38,7 @@ def scatter_map_anim(filtered_df):
 @st.cache_data(hash_funcs={dict: lambda _: None},show_spinner="Generating Plot")
 def scatter_map_static(filtered_df):
     fig_map = px.scatter_mapbox(
-        filtered_df.sort_values("event_date").dropna(),
+        filtered_df,
         lat="latitude",
         lon="longitude",
         hover_name="event_id_cnty",
