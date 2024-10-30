@@ -14,7 +14,7 @@ u = utils()
 def scatter_map_anim(filtered_df):
     chart_dict = {}
     fig_map = px.scatter_mapbox(
-        filtered_df.sort_values("event_date").dropna(),
+        filtered_df,
         lat="latitude",
         lon="longitude",
         animation_frame = "event_date",
@@ -82,7 +82,7 @@ def density_map_anim(density_data):
 @st.cache_data(hash_funcs={dict: lambda _: None},show_spinner = "Generating Plot")
 def density_map_static(density_data):
     fig_map = px.density_mapbox(
-                        density_data.sort_values("event_date").dropna(),
+                        density_data,
                         lat="latitude",
                         lon="longitude",
                         z = "sub_event_type",
